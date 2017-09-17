@@ -19,13 +19,20 @@ use sdl2::image::ImageRWops;
 
 pub type Result<T> = ::std::result::Result<T, Error>;
 
+/// All of the different errors that can happen in the running of
+/// a doodle.
 #[derive(Debug)]
 pub enum Error {
     SdlError(sdl2::Error),
+    /// Integer Overflow happened in the SDL2 library.
     IntegerOrSdlError(sdl2::IntegerOrSdlError),
+    /// An error happened while creating the TTF context.
     TtfInitError(sdl2::ttf::InitError),
+    /// A font releated error happened.
     FontError(sdl2::ttf::FontError),
+    /// An error occurred while building the window.
     WindowBuildError(sdl2::video::WindowBuildError),
+    /// Something bad happened.
     Error(String),
 }
 impl From<sdl2::Error> for Error {
@@ -59,8 +66,30 @@ impl From<sdl2::video::WindowBuildError> for Error {
     }
 }
 
+/// A Handler is a callback function that takes no arguments
+/// other than the state and renderer.
 pub type Handler<T> = Box<Fn(&mut T, &mut Renderer) -> ()>;
 
+/// A DoodleBuilder provides a simple api to create a Doodle
+///
+/// # Example
+/// ```
+/// let mut doodle = DoodleBuilder::new()
+///         .name("Test")
+///         .width(600)
+///         .height(400)
+///         .fps(30)
+///         .state(State {})
+///         .setup(Box::new(|_, r| {
+///             r.set_draw_color(Color::RGB(100, 100, 100));
+///             r.clear();
+///         }))
+///         .draw(Box::new(|_, r| {
+///             r.clear();
+///         }))
+///         .build()
+///         .unwrap();
+/// ```
 pub struct DoodleBuilder<'a, T: Default> {
     name: &'a str,
     width: u32,
@@ -72,9 +101,10 @@ pub struct DoodleBuilder<'a, T: Default> {
 }
 
 impl<'a, T: Default> DoodleBuilder<'a, T> {
+    /// Creates a DoodleBuilder with the default settings.
     pub fn new() -> Self {
         DoodleBuilder {
-            name: Default::default(),
+            name: "Doodle",
             state: Default::default(),
             fps: 30,
             width: 800,
@@ -83,34 +113,42 @@ impl<'a, T: Default> DoodleBuilder<'a, T> {
             draw: Box::new(|_, _| ()),
         }
     }
+    /// Sets the name of the doodle.
     pub fn name(mut self, name: &'a str) -> Self {
         self.name = name;
         self
     }
+    /// Sets the fps of the doodle.
     pub fn fps(mut self, fps: u32) -> Self {
         self.fps = fps;
         self
     }
+    /// Sets the width of the doodle.
     pub fn width(mut self, width: u32) -> Self {
         self.width = width;
         self
     }
+    /// Sets the height of the doodle.
     pub fn height(mut self, height: u32) -> Self {
         self.height = height;
         self
     }
+    /// Sets the object used to store the doodle's state.
     pub fn state(mut self, state: T) -> Self {
         self.state = state;
         self
     }
+    /// Sets the callback used to setup the doodle. 
     pub fn setup(mut self, setup: Handler<T>) -> Self {
         self.setup = setup;
         self
     }
+    /// Sets the callback used to draw each frame of the doodle.
     pub fn draw(mut self, draw: Handler<T>) -> Self {
         self.draw = draw;
         self
     }
+    /// Builds the doodle using the settings stored in this DoodleBuilder.
     pub fn build(self) -> Result<Doodle<T>> {
         Ok(Doodle {
             state: self.state,
@@ -122,6 +160,10 @@ impl<'a, T: Default> DoodleBuilder<'a, T> {
     }
 }
 
+/// A Doodle is responsible for actually starting the doodle and running the
+/// proper callbacks in response to events.
+/// 
+/// The only way to create a Doodle is with a DoodleBuilder.
 pub struct Doodle<T> {
     state: T,
     fps: u32,
@@ -131,6 +173,9 @@ pub struct Doodle<T> {
 }
 
 impl<T> Doodle<T> {
+    /// Starts running the doodle.
+    /// This method only returns if an error occurs or the doodle
+    /// has finished executing.
     pub fn run(&mut self) -> Result<()> {
         let mut clock = fps_clock::FpsClock::new(self.fps);
         (self.setup)(&mut self.state, &mut self.renderer);
@@ -150,6 +195,7 @@ impl<T> Doodle<T> {
     }
 }
 
+/// A Renderer is responsible for drawing to the screen.
 pub struct Renderer {
     canvas: Canvas<Window>,
     pump: EventPump,
@@ -164,15 +210,20 @@ impl Renderer {
             ttf_context,
         })
     }
+    /// Sets the color that the renderer uses for drawing shapes, text, background, etc.
     pub fn set_draw_color(&mut self, color: Color) {
         self.canvas.set_draw_color(color);
     }
+    /// Returns the current drawing color.
     pub fn draw_color(&self) -> Color {
         self.canvas.draw_color()
     }
+    /// Clears the screen with the current drawing color.
     pub fn clear(&mut self) {
         self.canvas.clear();
     }
+    /// Calling this function makes all the drawing operations
+    /// performed actually appear on the screen.
     pub fn present(&mut self) {
         self.canvas.present();
     }
@@ -199,26 +250,3 @@ fn init_sdl(
     Ok((canvas, event_pump, ttf_context))
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[derive(Default)]
-    struct State {}
-    #[test]
-    fn it_works() {
-        let mut doodle = DoodleBuilder::new()
-            .name("Test")
-            .width(600)
-            .height(400)
-            .fps(30)
-            .state(State {})
-            .setup(Box::new(|_, r| {
-                r.set_draw_color(Color::RGB(100, 100, 100));
-                r.clear();
-            }))
-            .draw(Box::new(|_, _| ()))
-            .build()
-            .unwrap();
-        doodle.run();
-    }
-}
