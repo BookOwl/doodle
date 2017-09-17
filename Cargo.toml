@@ -4,3 +4,9 @@ version = "0.1.0"
 authors = ["BookOwl <stanleybookowl@gmail.com>"]
 
 [dependencies]
+fps_clock = "2.0"
+
+[dependencies.sdl2]
+version = "0.30"
+default-features = false
+features = ["ttf","image"]
