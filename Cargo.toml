@@ -5,6 +5,7 @@ authors = ["BookOwl <stanleybookowl@gmail.com>"]
 
 [dependencies]
 fps_clock = "2.0"
+ludomath = "1.1"
 
 [dependencies.sdl2]
 version = "0.30"
