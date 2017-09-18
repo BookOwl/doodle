@@ -103,6 +103,7 @@ pub struct DoodleBuilder<'a, T: Default> {
 
 impl<'a, T: Default> DoodleBuilder<'a, T> {
     /// Creates a DoodleBuilder with the default settings.
+    #[inline]
     pub fn new() -> Self {
         DoodleBuilder {
             name: "Doodle",
@@ -115,41 +116,49 @@ impl<'a, T: Default> DoodleBuilder<'a, T> {
         }
     }
     /// Sets the name of the doodle.
+    #[inline]
     pub fn name(mut self, name: &'a str) -> Self {
         self.name = name;
         self
     }
     /// Sets the fps of the doodle.
+    #[inline]
     pub fn fps(mut self, fps: u32) -> Self {
         self.fps = fps;
         self
     }
     /// Sets the width of the doodle.
+    #[inline]
     pub fn width(mut self, width: u32) -> Self {
         self.width = width;
         self
     }
     /// Sets the height of the doodle.
+    #[inline]
     pub fn height(mut self, height: u32) -> Self {
         self.height = height;
         self
     }
     /// Sets the object used to store the doodle's state.
+    #[inline]
     pub fn state(mut self, state: T) -> Self {
         self.state = state;
         self
     }
-    /// Sets the callback used to setup the doodle. 
+    /// Sets the callback used to setup the doodle.
+    #[inline]
     pub fn setup(mut self, setup: Handler<T>) -> Self {
         self.setup = setup;
         self
     }
     /// Sets the callback used to draw each frame of the doodle.
+    #[inline]
     pub fn draw(mut self, draw: Handler<T>) -> Self {
         self.draw = draw;
         self
     }
     /// Builds the doodle using the settings stored in this DoodleBuilder.
+    #[inline]
     pub fn build(self) -> Result<Doodle<T>> {
         Ok(Doodle {
             state: self.state,
@@ -214,21 +223,25 @@ impl Renderer {
         })
     }
     /// Sets the color that the renderer uses for drawing shapes, text, background, etc.
+    #[inline]
     pub fn set_draw_color(&mut self, color: Color) {
         self.dirty = true;
         self.canvas.set_draw_color(color);
     }
     /// Returns the current drawing color.
+    #[inline]
     pub fn draw_color(&self) -> Color {
         self.canvas.draw_color()
     }
     /// Clears the screen with the current drawing color.
+    #[inline]
     pub fn clear(&mut self) {
         self.dirty = true;
         self.canvas.clear();
     }
     /// Calling this function makes all the drawing operations
     /// performed actually appear on the screen.
+    #[inline]
     pub fn present(&mut self) {
         if self.dirty {
             self.dirty = false;
