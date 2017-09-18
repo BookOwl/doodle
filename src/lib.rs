@@ -1,5 +1,6 @@
 extern crate fps_clock;
 extern crate sdl2;
+extern crate ludomath;
 
 use std::default::Default;
 
@@ -200,6 +201,7 @@ pub struct Renderer {
     canvas: Canvas<Window>,
     pump: EventPump,
     ttf_context: Sdl2TtfContext,
+    dirty: bool,
 }
 impl Renderer {
     fn new(app_name: &str, width: u32, height: u32) -> Result<Renderer> {
@@ -208,10 +210,12 @@ impl Renderer {
             canvas,
             pump,
             ttf_context,
+            dirty: true,
         })
     }
     /// Sets the color that the renderer uses for drawing shapes, text, background, etc.
     pub fn set_draw_color(&mut self, color: Color) {
+        self.dirty = true;
         self.canvas.set_draw_color(color);
     }
     /// Returns the current drawing color.
@@ -220,12 +224,16 @@ impl Renderer {
     }
     /// Clears the screen with the current drawing color.
     pub fn clear(&mut self) {
+        self.dirty = true;
         self.canvas.clear();
     }
     /// Calling this function makes all the drawing operations
     /// performed actually appear on the screen.
     pub fn present(&mut self) {
-        self.canvas.present();
+        if self.dirty {
+            self.dirty = false;
+            self.canvas.present();
+        }
     }
 }
 
